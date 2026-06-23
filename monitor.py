@@ -21,7 +21,7 @@ message = (
     f"Total Basket: ₹{cart_total}"
 )
 
-if cart_total <= TARGET_PRICE:
+if cart_total < TARGET_PRICE:
     requests.post(
         f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
         json={
