@@ -2,7 +2,7 @@ name: Verka Price Monitor
 
 on:
   schedule:
-    - cron: '*/30 1-18 * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,16 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - run: pip install -r requirements.txt
+      - name: Install
+        run: pip install -r requirements.txt
 
-      - run: playwright install chromium
-
-      - run: python monitor.py
+      - name: Run Monitor
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          PINCODE: ${{ secrets.PINCODE }}
+        run: python monitor.py
