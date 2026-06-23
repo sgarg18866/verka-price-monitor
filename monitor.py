@@ -12,7 +12,7 @@ milk_qty = 5
 
 cart_total = milk_price * milk_qty + curd_price
 
-TARGET_PRICE = 200
+TARGET_PRICE = 207
 
 message = (
     f"Verka Price Check\n\n"
