@@ -1,6 +1,5 @@
 import requests
 import os
-import json
 
 # ===== CONFIG =====
 PRICE_THRESHOLD = 27
@@ -48,12 +47,12 @@ def save_price(price):
 def fetch_price():
     r = requests.post(URL, headers=HEADERS, json=BODY, timeout=20)
 
-   print("Status Code:", r.status_code)
-   print("Content-Type:", r.headers.get("content-type"))
-   print("Response:")
-   print(r.text[:1000])
+    print("Status Code:", r.status_code)
+    print("Content-Type:", r.headers.get("content-type"))
+    print("Response:")
+    print(r.text[:1000])
 
-   return None
+    return None
 
 def main():
     price = fetch_price()
