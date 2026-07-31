@@ -45,7 +45,7 @@ def save_price(price):
     with open("last_price.txt", "w") as f:
         f.write(str(price))
 
-
+def fetch_price():
 r = requests.post(URL, headers=HEADERS, json=BODY, timeout=20)
 
 print("Status Code:", r.status_code)
