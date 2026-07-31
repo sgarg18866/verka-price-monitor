@@ -46,26 +46,14 @@ def save_price(price):
         f.write(str(price))
 
 
-def fetch_price():
-    r = requests.post(URL, headers=HEADERS, json=BODY, timeout=20)
-    data = r.json()
+r = requests.post(URL, headers=HEADERS, json=BODY, timeout=20)
 
-    widgets = data["data"]["widgets"]
+print("Status Code:", r.status_code)
+print("Content-Type:", r.headers.get("content-type"))
+print("Response:")
+print(r.text[:1000])
 
-    for w in widgets:
-        cards = w.get("data", {}).get("cards", [])
-        for c in cards:
-            products = c.get("data", {}).get("products", [])
-            for p in products:
-                name = p.get("displayName", "").lower()
-                qty = p.get("quantityDescription", "")
-
-                if "verka" in name and "500" in qty:
-                    price = int(p["price"]["offerPrice"]["units"])
-                    return price
-
-    return None
-
+return
 
 def main():
     price = fetch_price()
