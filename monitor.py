@@ -2,7 +2,7 @@ import requests
 import os
 
 # ===== CONFIG =====
-PRICE_THRESHOLD = 27
+PRICE_THRESHOLD = 30
 
 URL = "https://www.swiggy.com/api/instamart/search/v2?offset=0&ageConsent=false&layoutId=4987&voiceSearchTrackingId=&storeId=1389004&primaryStoreId=1389004&secondaryStoreId="
 
