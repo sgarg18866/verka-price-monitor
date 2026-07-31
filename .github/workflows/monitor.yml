@@ -1,27 +1,55 @@
 name: Verka Price Monitor
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
+
+  schedule:
+    - cron: "*/5 * * * *"
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    permissions:
+      contents: write
 
-      - name: Setup Python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.12"
 
-      - name: Install
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-      - name: Run Monitor
+      - name: Create state file if missing
+        run: |
+          if [ ! -f last_price.txt ]; then
+            echo "999" > last_price.txt
+          fi
+
+      - name: Run monitor
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python monitor.py
+          SWIGGY_COOKIE: ${{ secrets.SWIGGY_COOKIE }}
+        run: |
+          python monitor.py
+
+      - name: Commit updated state
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add last_price.txt
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update last notified price"
+            git push
+          fi

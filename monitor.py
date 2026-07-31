@@ -1,33 +1,92 @@
 import requests
 import os
+import json
 
-BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+# ===== CONFIG =====
+PRICE_THRESHOLD = 27
 
-# Current prices (replace later with scraper)
-milk_price = 26
-curd_price = 77
+URL = "https://www.swiggy.com/api/instamart/search/v2?offset=0&ageConsent=false&layoutId=4987&voiceSearchTrackingId=&storeId=1389004&primaryStoreId=1389004&secondaryStoreId="
 
-milk_qty = 5
+HEADERS = {
+    "content-type": "application/json",
+    "origin": "https://www.swiggy.com",
+    "referer": "https://www.swiggy.com/instamart/search?query=Verka+Double+Toned+Milk",
+    "user-agent": "Mozilla/5.0",
+    "cookie": os.getenv("SWIGGY_COOKIE")
+}
 
-cart_total = milk_price * milk_qty + curd_price
+BODY = {
+    "facets": [],
+    "sortAttribute": "",
+    "query": "Verka Double Toned Milk",
+    "search_results_offset": "0",
+    "page_type": "INSTAMART_AUTO_SUGGEST_PAGE",
+    "is_pre_search_tag": False
+}
 
-TARGET_PRICE = 207
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-message = (
-    f"Verka Price Check\n\n"
-    f"Milk (500ml): ₹{milk_price} x {milk_qty}\n"
-    f"Curd (1kg): ₹{curd_price}\n\n"
-    f"Total Basket: ₹{cart_total}"
-)
 
-if cart_total < TARGET_PRICE:
-    requests.post(
-        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-        json={
-            "chat_id": CHAT_ID,
-            "text": f"🔥 PRICE ALERT\n\n{message}"
-        }
-    )
-else:
-    print(message)
+def send_telegram(msg):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, json={"chat_id": CHAT_ID, "text": msg})
+
+
+def get_last_price():
+    try:
+        with open("last_price.txt", "r") as f:
+            return int(f.read().strip())
+    except:
+        return None
+
+
+def save_price(price):
+    with open("last_price.txt", "w") as f:
+        f.write(str(price))
+
+
+def fetch_price():
+    r = requests.post(URL, headers=HEADERS, json=BODY, timeout=20)
+    data = r.json()
+
+    widgets = data["data"]["widgets"]
+
+    for w in widgets:
+        cards = w.get("data", {}).get("cards", [])
+        for c in cards:
+            products = c.get("data", {}).get("products", [])
+            for p in products:
+                name = p.get("displayName", "").lower()
+                qty = p.get("quantityDescription", "")
+
+                if "verka" in name and "500" in qty:
+                    price = int(p["price"]["offerPrice"]["units"])
+                    return price
+
+    return None
+
+
+def main():
+    price = fetch_price()
+
+    if price is None:
+        print("Product not found")
+        return
+
+    print("Current Price:", price)
+
+    last_price = get_last_price()
+
+    if price < PRICE_THRESHOLD:
+        if last_price != price:
+            msg = f"?? Verka Milk Price Drop!\n?{price} on Swiggy Instamart"
+            send_telegram(msg)
+            save_price(price)
+    else:
+        # reset when price goes back up
+        save_price(999)
+
+
+if __name__ == "__main__":
+    main()
