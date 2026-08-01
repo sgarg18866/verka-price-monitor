@@ -141,7 +141,7 @@ def fetch_from_store(store):
                 timeout=20
             )
 			
-			print("=" * 80)
+            print("=" * 80)
             print("Status:", r.status_code)
             print("Content-Type:", r.headers.get("content-type"))
             print("URL:", r.url)
