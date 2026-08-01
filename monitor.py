@@ -140,6 +140,14 @@ def fetch_from_store(store):
                 params=params,
                 timeout=20
             )
+			
+			print("=" * 80)
+            print("Status:", r.status_code)
+            print("Content-Type:", r.headers.get("content-type"))
+            print("URL:", r.url)
+            print("Body:")
+            print(r.text[:1000])
+            print("=" * 80)
 
             print("Status:", r.status_code)
 
@@ -147,7 +155,7 @@ def fetch_from_store(store):
                 time.sleep(2)
                 continue
 
-            data = r.json()
+            #data = r.json()
 
             product = find_product(data)
 
